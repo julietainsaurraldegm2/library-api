@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { sequelize } from "./db/connection.js";
 import docsRouter from "./docs.js";
 import authorsRouter from "./routes/authors.routes.js";
-//import booksRouter from "./routes/books.routes.js";
+import booksRouter from "./routes/books.routes.js";
 //import loansRouter from "./routes/loans.routes.js";
 
 const app = express();
@@ -19,7 +19,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/docs", docsRouter);
 
    app.use("/authors", authorsRouter);
-   //app.use("/books", booksRouter);
+   app.use("/books", booksRouter);
    //app.use("/loans", loansRouter);
 
 // Ya hecho. Si un pedido falla con un error que nadie atrapó (por ejemplo, un error
