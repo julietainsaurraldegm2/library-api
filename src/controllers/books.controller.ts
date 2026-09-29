@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as booksRepository from "../repositories/books.repository.js";
 import type { NewBook, BookFilters, UpdateBook } from "../types/books.js";
 import type { Pagination } from "../types/common.js";
-import * as booksService from '../services/books.service';
+import * as booksService from '../services/books.service.js';
 
 function toInt(value: unknown): number | null {
   if (typeof value !== "string") return null;
