@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as booksRepository from "../repositories/books.repository.js";
 import type { NewBook, BookFilters, UpdateBook } from "../types/books.js";
 import type { Pagination } from "../types/common.js";
+import * as booksService from '../services/books.service';
 
 function toInt(value: unknown): number | null {
   if (typeof value !== "string") return null;
@@ -87,24 +88,65 @@ export async function create(req: Request, res: Response){
     res.status(201).json(book)
 }
 
-export async function update(req: Request, res: Response){
-    const id = parseId(req.params.id);
-    if(id === null ){
-        return res.status(400).json({error: "Id must be integer greater than 0"});
-    }
-    const changes : UpdateBook = {}
-    if(req.body.title !== undefined) changes.title = req.body.title;
-    if(req.body.year !== undefined) changes.year = req.body.title;
-    if(req.body.author_id !== undefined) changes.author_id;
-
-    const book = await booksRepository.update(id, changes);
-    if (book == null ){
-        return res.status(404).json({error: "Book not found"})
-    }
+export async function update(req: Request, res: Response) {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Id must be an integer greater than 0" });
+  }
+ 
+  const changes: UpdateBook = {};
+  if (req.body.title !== undefined) changes.title = req.body.title;
+  if (req.body.year !== undefined) changes.year = req.body.year;
+  if (req.body.author_id !== undefined) changes.author_id = req.body.author_id;
+ 
+  const result = await booksService.update(id, changes);
+  if (result === "BOOK_NOT_FOUND") {
+    return res.status(404).json({ error: "Book not found" });
+  }
+  if (result === "AUTHOR_NOT_FOUND") {
+    return res.status(404).json({ error: "Author not found" });
+  }
+ 
+  res.json(result);
 }
 
-export async function replace(req: Request, res: Response){
-
+export async function replace(req: Request, res: Response) {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Id must be an integer greater than 0" });
+  }
+ 
+  const data: NewBook = {
+    title: req.body.title,
+    year: req.body.year,
+    author_id: req.body.author_id,
+  };
+ 
+  const result = await booksService.update(id, data);
+  if (result === "BOOK_NOT_FOUND") {
+    return res.status(404).json({ error: "Book not found" });
+  }
+  if (result === "AUTHOR_NOT_FOUND") {
+    return res.status(404).json({ error: "Author not found" });
+  }
+ 
+  res.json(result);
 }
 
-export async function remove(req: Request, res: Response){}
+export async function remove(req: Request, res: Response) {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Id must be an integer greater than 0" });
+  }
+ 
+  const result = await booksService.remove(id);
+  if (result === "BOOK_NOT_FOUND") {
+    return res.status(404).json({ error: "Book not found" });
+  }
+  if (result === "HAS_LOANS") {
+    return res.status(409).json({ error: "Book has loans" });
+  }
+ 
+  res.status(204).send();
+}
+ 
