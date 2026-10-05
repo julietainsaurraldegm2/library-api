@@ -3,7 +3,8 @@ import { sequelize } from "./db/connection.js";
 import docsRouter from "./docs.js";
 import authorsRouter from "./routes/authors.routes.js";
 import booksRouter from "./routes/books.routes.js";
-// import loansRouter from "./routes/loans.routes.js";
+import "dotenv/config";
+
 
 const app = express();
 const PORT = 3000;
