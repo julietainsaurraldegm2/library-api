@@ -1,9 +1,10 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
 import { sequelize } from "./db/connection.js";
 import docsRouter from "./docs.js";
 import authorsRouter from "./routes/authors.routes.js";
+import authenticationRouter from "./routes/authentication.routes.js"
 import booksRouter from "./routes/books.routes.js";
-import "dotenv/config";
 
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/docs", docsRouter);
 // Rutas
 app.use("/authors", authorsRouter);
 app.use("/books", booksRouter);
+app.use("/auth", authenticationRouter);
 // app.use("/loans", loansRouter);
 
 // Manejo centralizado de errores
