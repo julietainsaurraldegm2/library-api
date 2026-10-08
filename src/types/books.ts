@@ -12,7 +12,11 @@ export interface NewBook {
 	author_id: number;
 }
 
-export type UpdateBook = Partial<NewBook>;
+export interface UpdateBook {
+  title?: string;
+  year?: number;
+  author_id?: number;
+}
 
 export interface BookFilters {
 	title: string;

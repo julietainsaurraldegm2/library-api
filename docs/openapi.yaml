@@ -114,7 +114,6 @@ paths: {}
         in: query
         description: Page number, starting at 1
         schema: { type: integer, minimum: 1, default: 1 }
-          - name: limit
             in: query
             description: Books per page
             schema: { type: integer, minimum: 1, default: 10 }

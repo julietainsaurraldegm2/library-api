@@ -1,38 +1,73 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
 import { sequelize } from "./db/connection.js";
 import docsRouter from "./docs.js";
 import authorsRouter from "./routes/authors.routes.js";
+import authenticationRouter from "./routes/authentication.routes.js"
 import booksRouter from "./routes/books.routes.js";
-//import loansRouter from "./routes/loans.routes.js";
+import { logger } from "./utils/logger.js";
+
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json()); // permite leer JSON del body en POST / PUT / PATCH
+// Body parsing
+app.use(express.json());
 
-// Ruta de prueba: si esto responde, el servidor está levantado.
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Library API running", docs: `http://localhost:${PORT}/docs` });
+// Logging
+
+app.use(requestLogger)
+app.use((req: Request, res: Response, next) => {
+  const start = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+
+    logger.info(
+      `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`
+    );
+  });
+
+  next();
 });
 
-// Documentación interactiva del contrato (docs/openapi.yaml). Ya hecho.
+// Ruta de prueba
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "Library API running",
+    docs: `http://localhost:${PORT}/docs`,
+  });
+});
+
+// Documentación
 app.use("/docs", docsRouter);
 
-   app.use("/authors", authorsRouter);
-   app.use("/books", booksRouter);
-   //app.use("/loans", loansRouter);
+// Rutas
+app.use("/authors", authorsRouter);
+app.use("/books", booksRouter);
+app.use("/auth", authenticationRouter);
+// app.use("/loans", loansRouter);
 
-// Ya hecho. Si un pedido falla con un error que nadie atrapó (por ejemplo, un error
-// de la base), lo mostramos en la terminal en vez de apagar el servidor.
+// Manejo centralizado de errores
+app.use((err: Error, req: Request, res: Response, next: Function) => {
+  console.error("Error:", err);
+
+  res.status(500).json({
+    error: "Internal server error",
+  });
+});
+
+// Errores no manejados de Promises
 process.on("unhandledRejection", (error) => {
-  console.error("❌ Unhandled error:", error);
+  console.error(" Unhandled error:", error);
 });
 
 async function start() {
-  await sequelize.authenticate(); // falla si Postgres no está prendido, si la base `library` no existe o si la contraseña de src/db/connection.ts está mal
+  await sequelize.authenticate();
+
   app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-    console.log(`Docs available at    http://localhost:${PORT}/docs`);
+    logger.info(`Server listening on http://localhost:${PORT}`);
+    logger.info(`Docs available at    http://localhost:${PORT}/docs`);
   });
 }
 
