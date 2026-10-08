@@ -5,6 +5,7 @@ import docsRouter from "./docs.js";
 import authorsRouter from "./routes/authors.routes.js";
 import authenticationRouter from "./routes/authentication.routes.js"
 import booksRouter from "./routes/books.routes.js";
+import { logger } from "./utils/logger.js";
 
 
 const app = express();
@@ -14,13 +15,15 @@ const PORT = 3000;
 app.use(express.json());
 
 // Logging
+
+app.use(requestLogger)
 app.use((req: Request, res: Response, next) => {
   const start = Date.now();
 
   res.on("finish", () => {
     const duration = Date.now() - start;
 
-    console.log(
+    logger.info(
       `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`
     );
   });
@@ -63,8 +66,8 @@ async function start() {
   await sequelize.authenticate();
 
   app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-    console.log(`Docs available at    http://localhost:${PORT}/docs`);
+    logger.info(`Server listening on http://localhost:${PORT}`);
+    logger.info(`Docs available at    http://localhost:${PORT}/docs`);
   });
 }
 
